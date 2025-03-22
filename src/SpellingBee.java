@@ -22,7 +22,7 @@ import java.util.Scanner;
  * It utilizes recursion to generate the strings, mergesort to sort them, and
  * binary search to find them in a dictionary.
  *
- * @author Zach Blick, [ADD YOUR NAME HERE]
+ * @author Zach Blick, David Lutch
  *
  * Written on March 5, 2023 for CS2 @ Menlo School
  *
@@ -50,7 +50,42 @@ public class SpellingBee {
     // TODO: Apply mergesort to sort all words. Do this by calling ANOTHER method
     //  that will find the substrings recursively.
     public void sort() {
-        // YOUR CODE HERE
+        // Sorting via the lexicographic difference (lowest value first)
+        ArrayList<String> arr1 = new ArrayList<String>();
+        ArrayList<String> arr2 = new ArrayList<String>();
+        arr1.add("g");
+        arr2.add("b");
+        arr2.add("a");
+        arr1.add("z");
+        String[] lol = mergeSort(arr1, arr2);
+        for (int i = 0; i < arr1.size() + arr2.size(); i++) {
+            System.out.println(lol[i]);
+        }
+
+    }
+    // Split the words into separate arrays
+    public String[] mergeSort(ArrayList<String> arr1, ArrayList<String> arr2) {
+            String[] merged = new String[arr1.size() + arr2.size()];
+            int index1 = 0, index2 = 0, count = 0;
+
+            while (index1 < arr1.size() && index2 < arr2.size()) {
+                if (arr1.get(index1).compareTo(arr2.get(index2)) < 0) {
+                    merged[count] = arr1.get(index1++);
+                }
+                else {
+                    merged[count] = arr2.get(index2++);
+                }
+                count++;
+            }
+            // Copy over any remaining elements
+            while (index1 < arr1.size()) {
+                merged[count++] = arr1.get(index1++);
+            }
+
+            while (index2 < arr2.size()) {
+                merged[count++] = arr2.get(index2++);
+            }
+            return merged;
     }
 
     // Removes duplicates from the sorted list.
@@ -69,6 +104,25 @@ public class SpellingBee {
     //  If it is not in the dictionary, remove it from words.
     public void checkWords() {
         // YOUR CODE HERE
+        for (int i = 0; i < words.size(); i++) {
+            if (!found(words.get(i), DICTIONARY_SIZE / 2)) {
+                // Remove the word from the list if it's not a valid word
+                words.remove(words.get(i));
+            }
+        }
+    }
+    // Recursive - binary search
+    public boolean found(String s, int index) {
+        if (s.isEmpty()) {
+            return false;
+        }
+        if (s.compareTo(DICTIONARY[index]) > 0) {
+            found(s.substring(0, s.length()-1), (int) (index * 1.5));
+        }
+        if (s.compareTo(DICTIONARY[index]) < 0) {
+            found(s.substring(0, s.length()-1), (int) (index * 0.5));
+        }
+            return true;
     }
 
     // Prints all valid words to wordList.txt
@@ -110,10 +164,9 @@ public class SpellingBee {
     }
 
     public static void main(String[] args) {
-
         // Prompt for letters until given only letters.
-        Scanner s = new Scanner(System.in);
-        String letters;
+       Scanner s = new Scanner(System.in);
+       String letters;
         do {
             System.out.print("Enter your letters: ");
             letters = s.nextLine();
