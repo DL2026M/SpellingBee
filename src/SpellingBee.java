@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.Scanner;
 
 /**
@@ -48,7 +49,7 @@ public class SpellingBee {
         makeWords("", letters);
 
     }
-    public void makeWords(String currentString, String letters) {
+    private void makeWords(String currentString, String letters) {
             if (!currentString.isEmpty()) {
                 words.add(currentString);
             }
@@ -66,25 +67,41 @@ public class SpellingBee {
     //  that will find the substrings recursively.
     public void sort() {
         // Sorting via the lexicographic difference (lowest value first)
-        ArrayList<String> arr1 = new ArrayList<String>();
-        ArrayList<String> arr2 = new ArrayList<String>();
-        for (int i = 0; i < words.size(); i++) {
-            if (i % 2 == 0) {
-                arr1.add(words.get(i));
-            }
-            else {
-                arr2.add(words.get(i));
-            }
-       }
+        words = mergeSort(words);
 
     }
-    // Split the words into separate arrays
-    public ArrayList<String> mergeSort(ArrayList<String> arr1, ArrayList<String> arr2) {
+    private ArrayList<String> mergeSort(ArrayList<String> arrayOfWords) {
+        // Return's the array if it's already split up
+        if (arrayOfWords.size() == 1) {
+            return arrayOfWords;
+        }
+            ArrayList<String> arr1 = new ArrayList<String>();
+            ArrayList<String> arr2 = new ArrayList<String>();
+
+            for (int i = 0; i < arrayOfWords.size(); i++) {
+                // Adds the first half of the array to array 1
+                if (arrayOfWords.size() / 2 > i) {
+                    arr1.add(arrayOfWords.get(i));
+                } else {
+                    arr2.add(arrayOfWords.get(i));
+                }
+
+            }
+            // Recursively calls itself to split both halves into single array's
+            arr1 = mergeSort(arr1);
+            arr2 = mergeSort(arr2);
+            return merge(arr1, arr2);
+    }
+    // Puts the words in order using mergesort
+    private ArrayList<String> merge(ArrayList<String> arr1, ArrayList<String> arr2) {
             ArrayList<String> merged = new ArrayList<String>();
             int index1 = 0, index2 = 0, count = 0;
 
             while (index1 < arr1.size() && index2 < arr2.size()) {
+                // If the current word in array 1 goes before the current word in array 2
+                // Then add it to the arraylist named merged
                 if (arr1.get(index1).compareTo(arr2.get(index2)) < 0) {
+
                     merged.add(count, arr1.get(index1++));
                 }
                 else {
@@ -119,25 +136,37 @@ public class SpellingBee {
     //  If it is not in the dictionary, remove it from words.
     public void checkWords() {
         // YOUR CODE HERE
+        int startIndex = 0;
+        int endIndex = DICTIONARY_SIZE - 1;
+
         for (int i = 0; i < words.size(); i++) {
-            if (!found(words.get(i), DICTIONARY_SIZE / 2)) {
+            if (!found(words.get(i), startIndex, endIndex)) {
                 // Remove the word from the list if it's not a valid word
-                words.remove(words.get(i));
+                words.remove(i);
+                i--;
             }
         }
     }
-    // Recursive - binary search
-    public boolean found(String s, int index) {
-        if (s.isEmpty()) {
+    // Recursively calls itself to see if each word created is a valid word by using binary search
+    private boolean found(String targetWord, int startIndex, int endIndex) {
+        int midIndex = (startIndex + endIndex) / 2;
+        if (targetWord.equals(DICTIONARY[midIndex])) {
+            return true;
+        }
+        // Returns false if the starting index is out of bounds
+        if (startIndex > endIndex) {
             return false;
         }
-        if (s.compareTo(DICTIONARY[index]) < 0) {
-            found(s, (int) (index * 1.5));
+        // Checks to see if the target word is to left of the middle index
+        if (targetWord.compareTo(DICTIONARY[midIndex]) < 0) {
+            // Shifts the middle index to the left
+            return found(targetWord, startIndex,midIndex - 1);
         }
-        if (s.compareTo(DICTIONARY[index]) > 0) {
-            found(s, (int) (index * 0.5));
+        if (targetWord.compareTo(DICTIONARY[midIndex]) > 0) {
+            // Shifts the middle index to the right
+            return found(targetWord, midIndex + 1, endIndex);
         }
-            return true;
+        return true;
     }
 
     // Prints all valid words to wordList.txt
